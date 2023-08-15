@@ -82,7 +82,7 @@ variables:
 trigger:
   - platform: state
     entity_id:
-      - sensor.denver_football
+      - "{{ my_sensor }}"
     to: IN
     id: Game Start
   - platform: state
