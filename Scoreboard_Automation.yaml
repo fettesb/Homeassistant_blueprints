@@ -1,5 +1,84 @@
-alias: 🏈 Awtrix - NFL Team Score Denver Broncos 🏈
-description: NFL ScoreBoard for Awtrix Light
+blueprint:
+  name: "AWTRIX - NFL Team Scoreboard"
+  author: Hank_the_Tank
+  description: >
+    ## NFL Team Scoreboard for AWTRIX Light
+
+    
+
+    ### Screenshot
+
+      ![](https://raw.githubusercontent.com/fettesb/Homeassistant_blueprints/main/screenshot.svg)
+
+      ![](https://raw.githubusercontent.com/fettesb/Homeassistant_blueprints/main/screenshot2.svg)
+
+      ![](https://raw.githubusercontent.com/fettesb/Homeassistant_blueprints/main/screenshot3.svg)
+      
+
+
+    ### Prerequisites
+
+    Before using this blueprint, ensure that you have HACS installed. You also need the ha-teamtracker integration [here](https://github.com/vasqued2/ha-teamtracker).
+
+    ### Credits
+
+    
+
+  domain: automation
+
+
+  input:
+    awtrix:
+      name: AWTRIX Light
+      description: Select the Awtrix light
+      selector:
+        device:
+          filter:
+            - integration: mqtt
+              manufacturer: Blueforcer
+              model: AWTRIX Light
+          multiple: false
+
+    basetopic:
+      name: Basetopic
+      description: Basetopic is only nessery if you have a special mqtt topic configured on the Awtrix
+      default: "Device"
+      selector:
+        text:
+
+    appname:
+      name: Awtrix Application name
+      description: This is the app name listed in the MQTT topic - it should be unique
+      default: "nflteamscore"
+      selector:
+        text:
+
+    my_sensor:
+      name: Football Sensor
+      description: Select your Football Team Sensor
+      selector:
+        entity:
+          filter:
+            - integration: teamtracker
+  
+  source_url: https://raw.githubusercontent.com/fettesb/Homeassistant_blueprints/main/Scoreboard_Automation.yaml
+
+
+
+variables:
+  basetopic: >
+    {%- set ns = namespace(awtrix = []) -%}
+    {%- for device_id in device_ids -%}
+      {%- set device_name = iif(device_attr(device_id, 'name_by_user') != none, device_attr(device_id, 'name_by_user'), device_attr(device_id, 'name')) -%}
+      {%- set entity = expand(device_entities(device_id)) | select('search', 'device_topic') | map(attribute='entity_id') | first -%}
+      {%- set topic = states(entity) -%}
+      {% set ns.awtrix = ns.awtrix + [{"device": device_name, "entity": entity, "topic": topic}] -%}
+    {%- endfor -%}
+    {{ ns.awtrix }}
+  appname: !input appname
+  my_sensor: !input my_sensor
+
+
 trigger:
   - platform: state
     entity_id:
@@ -57,31 +136,31 @@ action:
             data:
               qos: 0
               retain: false
-              topic: awtrix_a8ba90/custom/nflteamscore
+              topic: "{{basetopic}}/custom/{{appname}}"
               payload: >-
                 {  "draw":[ {"df":[0,0,16,8,"{{
-                states.sensor.denver_football.attributes.team_colors[0]
+                states.denver_football.attributes.team_colors[0]
                 }}"]},     {"df":[16,0,16,8,"{{
-                states.sensor.denver_football.attributes.opponent_colors[0]
+                states.denver_football.attributes.opponent_colors[0]
                 }}"]}, {"dl":[1,0,1,7,"{{
-                states.sensor.denver_football.attributes.team_colors[1] }}"]},
+                states.denver_football.attributes.team_colors[1] }}"]},
                 {"dl":[3,0,3,7,"{{
-                states.sensor.denver_football.attributes.team_colors[1] }}"]},
+                states.denver_football.attributes.team_colors[1] }}"]},
                 {"dl":[28,0,28,7,"{{
-                states.sensor.denver_football.attributes.opponent_colors[1]
+                states.denver_football.attributes.opponent_colors[1]
                 }}"]}, {"dl":[30,0,30,7,"{{
-                states.sensor.denver_football.attributes.opponent_colors[1]
+                states.denver_football.attributes.opponent_colors[1]
                 }}"]}, {"dp":[12,7,"#ffffff"]}, {"dp":[14,7,"#919191"]},
                 {"dp":[17,7,"#919191"]}, {"dp":[19,7,"#919191"]}, {"dt":[7, 1,
-                "{{ "0" + states.sensor.denver_football.attributes.team_score |
-                string if states.sensor.denver_football.attributes.team_score |
+                "{{ "0" + states.denver_football.attributes.team_score |
+                string if states.denver_football.attributes.team_score |
                 int < 10 else
-                states.sensor.denver_football.attributes.team_score
+                states.denver_football.attributes.team_score
                 }}",[255,255,255]]}, {"dt":[18, 1, "{{ "0" +
-                states.sensor.denver_football.attributes.opponent_score | string
-                if states.sensor.denver_football.attributes.opponent_score | int
+                states.denver_football.attributes.opponent_score | string
+                if states.denver_football.attributes.opponent_score | int
                 < 10 else
-                states.sensor.denver_football.attributes.opponent_score
+                states.denver_football.attributes.opponent_score
                 }}",[255,255,255]]}, {"dl":[15,3,16,3,"#ffffff"]} ], "duration":
                 15 }
           - service: mqtt.publish
@@ -99,7 +178,7 @@ action:
             data:
               qos: 0
               retain: false
-              topic: awtrix_a8ba90/custom/nflteamscore
+              topic: "{{basetopic}}/custom/{{appname}}"
       - conditions:
           - condition: trigger
             id:
@@ -114,31 +193,31 @@ action:
             data:
               qos: 0
               retain: false
-              topic: awtrix_a8ba90/custom/nflteamscore
+              topic: "{{basetopic}}/custom/{{appname}}"
               payload: >-
                 {  "draw":[ {"df":[0,0,16,8,"{{
-                states.sensor.denver_football.attributes.team_colors[0]
+                states.denver_football.attributes.team_colors[0]
                 }}"]},     {"df":[16,0,16,8,"{{
-                states.sensor.denver_football.attributes.opponent_colors[0]
+                states.denver_football.attributes.opponent_colors[0]
                 }}"]}, {"dl":[1,0,1,7,"{{
-                states.sensor.denver_football.attributes.team_colors[1] }}"]},
+                states.denver_football.attributes.team_colors[1] }}"]},
                 {"dl":[3,0,3,7,"{{
-                states.sensor.denver_football.attributes.team_colors[1] }}"]},
+                states.denver_football.attributes.team_colors[1] }}"]},
                 {"dl":[28,0,28,7,"{{
-                states.sensor.denver_football.attributes.opponent_colors[1]
+                states.denver_football.attributes.opponent_colors[1]
                 }}"]}, {"dl":[30,0,30,7,"{{
-                states.sensor.denver_football.attributes.opponent_colors[1]
+                states.denver_football.attributes.opponent_colors[1]
                 }}"]}, {"dp":[12,7,"#ffffff"]}, {"dp":[14,7,"#919191"]},
                 {"dp":[17,7,"#919191"]}, {"dp":[19,7,"#919191"]}, {"dt":[7, 1,
-                "{{ "0" + states.sensor.denver_football.attributes.team_score |
-                string if states.sensor.denver_football.attributes.team_score |
+                "{{ "0" + states.denver_football.attributes.team_score |
+                string if states.denver_football.attributes.team_score |
                 int < 10 else
-                states.sensor.denver_football.attributes.team_score
+                states.denver_football.attributes.team_score
                 }}",[255,255,255]]}, {"dt":[18, 1, "{{ "0" +
-                states.sensor.denver_football.attributes.opponent_score | string
-                if states.sensor.denver_football.attributes.opponent_score | int
+                states.denver_football.attributes.opponent_score | string
+                if states.denver_football.attributes.opponent_score | int
                 < 10 else
-                states.sensor.denver_football.attributes.opponent_score
+                states.denver_football.attributes.opponent_score
                 }}",[255,255,255]]}, {"dl":[15,3,16,3,"#ffffff"]} ], "duration":
                 15 }
       - conditions:
@@ -155,31 +234,31 @@ action:
             data:
               qos: 0
               retain: false
-              topic: awtrix_a8ba90/custom/nflteamscore
+              topic: "{{basetopic}}/custom/{{appname}}"
               payload: >-
                 {  "draw":[ {"df":[0,0,16,8,"{{
-                states.sensor.denver_football.attributes.team_colors[0]
+                states.denver_football.attributes.team_colors[0]
                 }}"]},     {"df":[16,0,16,8,"{{
-                states.sensor.denver_football.attributes.opponent_colors[0]
+                states.denver_football.attributes.opponent_colors[0]
                 }}"]}, {"dl":[1,0,1,7,"{{
-                states.sensor.denver_football.attributes.team_colors[1] }}"]},
+                states.denver_football.attributes.team_colors[1] }}"]},
                 {"dl":[3,0,3,7,"{{
-                states.sensor.denver_football.attributes.team_colors[1] }}"]},
+                states.denver_football.attributes.team_colors[1] }}"]},
                 {"dl":[28,0,28,7,"{{
-                states.sensor.denver_football.attributes.opponent_colors[1]
+                states.denver_football.attributes.opponent_colors[1]
                 }}"]}, {"dl":[30,0,30,7,"{{
-                states.sensor.denver_football.attributes.opponent_colors[1]
+                states.denver_football.attributes.opponent_colors[1]
                 }}"]}, {"dp":[12,7,"#ffffff"]}, {"dp":[14,7,"#ffffff"]},
                 {"dp":[17,7,"#919191"]}, {"dp":[19,7,"#919191"]}, {"dt":[7, 1,
-                "{{ "0" + states.sensor.denver_football.attributes.team_score |
-                string if states.sensor.denver_football.attributes.team_score |
+                "{{ "0" + states.denver_football.attributes.team_score |
+                string if states.denver_football.attributes.team_score |
                 int < 10 else
-                states.sensor.denver_football.attributes.team_score
+                states.denver_football.attributes.team_score
                 }}",[255,255,255]]}, {"dt":[18, 1, "{{ "0" +
-                states.sensor.denver_football.attributes.opponent_score | string
-                if states.sensor.denver_football.attributes.opponent_score | int
+                states.denver_football.attributes.opponent_score | string
+                if states.denver_football.attributes.opponent_score | int
                 < 10 else
-                states.sensor.denver_football.attributes.opponent_score
+                states.denver_football.attributes.opponent_score
                 }}",[255,255,255]]}, {"dl":[15,3,16,3,"#ffffff"]} ], "duration":
                 15 }
       - conditions:
@@ -196,31 +275,31 @@ action:
             data:
               qos: 0
               retain: false
-              topic: awtrix_a8ba90/custom/nflteamscore
+              topic: "{{basetopic}}/custom/{{appname}}"
               payload: >-
                 {  "draw":[ {"df":[0,0,16,8,"{{
-                states.sensor.denver_football.attributes.team_colors[0]
+                states.denver_football.attributes.team_colors[0]
                 }}"]},     {"df":[16,0,16,8,"{{
-                states.sensor.denver_football.attributes.opponent_colors[0]
+                states.denver_football.attributes.opponent_colors[0]
                 }}"]}, {"dl":[1,0,1,7,"{{
-                states.sensor.denver_football.attributes.team_colors[1] }}"]},
+                states.denver_football.attributes.team_colors[1] }}"]},
                 {"dl":[3,0,3,7,"{{
-                states.sensor.denver_football.attributes.team_colors[1] }}"]},
+                states.denver_football.attributes.team_colors[1] }}"]},
                 {"dl":[28,0,28,7,"{{
-                states.sensor.denver_football.attributes.opponent_colors[1]
+                states.denver_football.attributes.opponent_colors[1]
                 }}"]}, {"dl":[30,0,30,7,"{{
-                states.sensor.denver_football.attributes.opponent_colors[1]
+                states.denver_football.attributes.opponent_colors[1]
                 }}"]}, {"dp":[12,7,"#ffffff"]}, {"dp":[14,7,"#ffffff"]},
                 {"dp":[17,7,"#ffffff"]}, {"dp":[19,7,"#919191"]}, {"dt":[7, 1,
-                "{{ "0" + states.sensor.denver_football.attributes.team_score |
-                string if states.sensor.denver_football.attributes.team_score |
+                "{{ "0" + states.denver_football.attributes.team_score |
+                string if states.denver_football.attributes.team_score |
                 int < 10 else
-                states.sensor.denver_football.attributes.team_score
+                states.denver_football.attributes.team_score
                 }}",[255,255,255]]}, {"dt":[18, 1, "{{ "0" +
-                states.sensor.denver_football.attributes.opponent_score | string
-                if states.sensor.denver_football.attributes.opponent_score | int
+                states.denver_football.attributes.opponent_score | string
+                if states.denver_football.attributes.opponent_score | int
                 < 10 else
-                states.sensor.denver_football.attributes.opponent_score
+                states.denver_football.attributes.opponent_score
                 }}",[255,255,255]]}, {"dl":[15,3,16,3,"#ffffff"]} ], "duration":
                 15 }
       - conditions:
@@ -237,31 +316,31 @@ action:
             data:
               qos: 0
               retain: false
-              topic: awtrix_a8ba90/custom/nflteamscore
+              topic: "{{basetopic}}/custom/{{appname}}"
               payload: >-
                 {  "draw":[ {"df":[0,0,16,8,"{{
-                states.sensor.denver_football.attributes.team_colors[0]
+                states.denver_football.attributes.team_colors[0]
                 }}"]},     {"df":[16,0,16,8,"{{
-                states.sensor.denver_football.attributes.opponent_colors[0]
+                states.denver_football.attributes.opponent_colors[0]
                 }}"]}, {"dl":[1,0,1,7,"{{
-                states.sensor.denver_football.attributes.team_colors[1] }}"]},
+                states.denver_football.attributes.team_colors[1] }}"]},
                 {"dl":[3,0,3,7,"{{
-                states.sensor.denver_football.attributes.team_colors[1] }}"]},
+                states.denver_football.attributes.team_colors[1] }}"]},
                 {"dl":[28,0,28,7,"{{
-                states.sensor.denver_football.attributes.opponent_colors[1]
+                states.denver_football.attributes.opponent_colors[1]
                 }}"]}, {"dl":[30,0,30,7,"{{
-                states.sensor.denver_football.attributes.opponent_colors[1]
+                states.denver_football.attributes.opponent_colors[1]
                 }}"]}, {"dp":[12,7,"#ffffff"]}, {"dp":[14,7,"#ffffff"]},
                 {"dp":[17,7,"#ffffff"]}, {"dp":[19,7,"#ffffff"]}, {"dt":[7, 1,
-                "{{ "0" + states.sensor.denver_football.attributes.team_score |
-                string if states.sensor.denver_football.attributes.team_score |
+                "{{ "0" + states.denver_football.attributes.team_score |
+                string if states.denver_football.attributes.team_score |
                 int < 10 else
-                states.sensor.denver_football.attributes.team_score
+                states.denver_football.attributes.team_score
                 }}",[255,255,255]]}, {"dt":[18, 1, "{{ "0" +
-                states.sensor.denver_football.attributes.opponent_score | string
-                if states.sensor.denver_football.attributes.opponent_score | int
+                states.denver_football.attributes.opponent_score | string
+                if states.denver_football.attributes.opponent_score | int
                 < 10 else
-                states.sensor.denver_football.attributes.opponent_score
+                states.denver_football.attributes.opponent_score
                 }}",[255,255,255]]}, {"dl":[15,3,16,3,"#ffffff"]} ], "duration":
                 15 }
       - conditions:
@@ -278,31 +357,31 @@ action:
             data:
               qos: 0
               retain: false
-              topic: awtrix_a8ba90/custom/nflteamscore
+              topic: "{{basetopic}}/custom/{{appname}}"
               payload: >-
                 {  "draw":[ {"df":[0,0,16,8,"{{
-                states.sensor.denver_football.attributes.team_colors[0]
+                states.denver_football.attributes.team_colors[0]
                 }}"]},     {"df":[16,0,16,8,"{{
-                states.sensor.denver_football.attributes.opponent_colors[0]
+                states.denver_football.attributes.opponent_colors[0]
                 }}"]}, {"dl":[1,0,1,7,"{{
-                states.sensor.denver_football.attributes.team_colors[1] }}"]},
+                states.denver_football.attributes.team_colors[1] }}"]},
                 {"dl":[3,0,3,7,"{{
-                states.sensor.denver_football.attributes.team_colors[1] }}"]},
+                states.denver_football.attributes.team_colors[1] }}"]},
                 {"dl":[28,0,28,7,"{{
-                states.sensor.denver_football.attributes.opponent_colors[1]
+                states.denver_football.attributes.opponent_colors[1]
                 }}"]}, {"dl":[30,0,30,7,"{{
-                states.sensor.denver_football.attributes.opponent_colors[1]
+                states.denver_football.attributes.opponent_colors[1]
                 }}"]}, {"dp":[12,7,"#ffffff"]}, {"dp":[14,7,"#919191"]},
                 {"dp":[17,7,"#919191"]}, {"dp":[19,7,"#919191"]}, {"dt":[7, 1,
-                "{{ "0" + states.sensor.denver_football.attributes.team_score |
-                string if states.sensor.denver_football.attributes.team_score |
+                "{{ "0" + states.denver_football.attributes.team_score |
+                string if states.denver_football.attributes.team_score |
                 int < 10 else
-                states.sensor.denver_football.attributes.team_score
+                states.denver_football.attributes.team_score
                 }}",[255,255,255]]}, {"dt":[18, 1, "{{ "0" +
-                states.sensor.denver_football.attributes.opponent_score | string
-                if states.sensor.denver_football.attributes.opponent_score | int
+                states.denver_football.attributes.opponent_score | string
+                if states.denver_football.attributes.opponent_score | int
                 < 10 else
-                states.sensor.denver_football.attributes.opponent_score
+                states.denver_football.attributes.opponent_score
                 }}",[255,255,255]]}, {"dl":[15,3,16,3,"#ffffff"]} ], "duration":
                 15 }
       - conditions:
@@ -319,31 +398,31 @@ action:
             data:
               qos: 0
               retain: false
-              topic: awtrix_a8ba90/custom/nflteamscore
+              topic: "{{basetopic}}/custom/{{appname}}"
               payload: >-
                 {  "draw":[ {"df":[0,0,16,8,"{{
-                states.sensor.denver_football.attributes.team_colors[0]
+                states.denver_football.attributes.team_colors[0]
                 }}"]},     {"df":[16,0,16,8,"{{
-                states.sensor.denver_football.attributes.opponent_colors[0]
+                states.denver_football.attributes.opponent_colors[0]
                 }}"]}, {"dl":[1,0,1,7,"{{
-                states.sensor.denver_football.attributes.team_colors[1] }}"]},
+                states.denver_football.attributes.team_colors[1] }}"]},
                 {"dl":[3,0,3,7,"{{
-                states.sensor.denver_football.attributes.team_colors[1] }}"]},
+                states.denver_football.attributes.team_colors[1] }}"]},
                 {"dl":[28,0,28,7,"{{
-                states.sensor.denver_football.attributes.opponent_colors[1]
+                states.denver_football.attributes.opponent_colors[1]
                 }}"]}, {"dl":[30,0,30,7,"{{
-                states.sensor.denver_football.attributes.opponent_colors[1]
+                states.denver_football.attributes.opponent_colors[1]
                 }}"]}, {"dp":[12,7,"#ffffff"]}, {"dp":[14,7,"#ffffff"]},
                 {"dp":[17,7,"#919191"]}, {"dp":[19,7,"#919191"]}, {"dt":[7, 1,
-                "{{ "0" + states.sensor.denver_football.attributes.team_score |
-                string if states.sensor.denver_football.attributes.team_score |
+                "{{ "0" + states.denver_football.attributes.team_score |
+                string if states.denver_football.attributes.team_score |
                 int < 10 else
-                states.sensor.denver_football.attributes.team_score
+                states.denver_football.attributes.team_score
                 }}",[255,255,255]]}, {"dt":[18, 1, "{{ "0" +
-                states.sensor.denver_football.attributes.opponent_score | string
-                if states.sensor.denver_football.attributes.opponent_score | int
+                states.denver_football.attributes.opponent_score | string
+                if states.denver_football.attributes.opponent_score | int
                 < 10 else
-                states.sensor.denver_football.attributes.opponent_score
+                states.denver_football.attributes.opponent_score
                 }}",[255,255,255]]}, {"dl":[15,3,16,3,"#ffffff"]} ], "duration":
                 15 }
       - conditions:
@@ -360,31 +439,31 @@ action:
             data:
               qos: 0
               retain: false
-              topic: awtrix_a8ba90/custom/nflteamscore
+              topic: "{{basetopic}}/custom/{{appname}}"
               payload: >-
                 {  "draw":[ {"df":[0,0,16,8,"{{
-                states.sensor.denver_football.attributes.team_colors[0]
+                states.denver_football.attributes.team_colors[0]
                 }}"]},     {"df":[16,0,16,8,"{{
-                states.sensor.denver_football.attributes.opponent_colors[0]
+                states.denver_football.attributes.opponent_colors[0]
                 }}"]}, {"dl":[1,0,1,7,"{{
-                states.sensor.denver_football.attributes.team_colors[1] }}"]},
+                states.denver_football.attributes.team_colors[1] }}"]},
                 {"dl":[3,0,3,7,"{{
-                states.sensor.denver_football.attributes.team_colors[1] }}"]},
+                states.denver_football.attributes.team_colors[1] }}"]},
                 {"dl":[28,0,28,7,"{{
-                states.sensor.denver_football.attributes.opponent_colors[1]
+                states.denver_football.attributes.opponent_colors[1]
                 }}"]}, {"dl":[30,0,30,7,"{{
-                states.sensor.denver_football.attributes.opponent_colors[1]
+                states.denver_football.attributes.opponent_colors[1]
                 }}"]}, {"dp":[12,7,"#ffffff"]}, {"dp":[14,7,"#ffffff"]},
                 {"dp":[17,7,"#ffffff"]}, {"dp":[19,7,"#919191"]}, {"dt":[7, 1,
-                "{{ "0" + states.sensor.denver_football.attributes.team_score |
-                string if states.sensor.denver_football.attributes.team_score |
+                "{{ "0" + states.denver_football.attributes.team_score |
+                string if states.denver_football.attributes.team_score |
                 int < 10 else
-                states.sensor.denver_football.attributes.team_score
+                states.denver_football.attributes.team_score
                 }}",[255,255,255]]}, {"dt":[18, 1, "{{ "0" +
-                states.sensor.denver_football.attributes.opponent_score | string
-                if states.sensor.denver_football.attributes.opponent_score | int
+                states.denver_football.attributes.opponent_score | string
+                if states.denver_football.attributes.opponent_score | int
                 < 10 else
-                states.sensor.denver_football.attributes.opponent_score
+                states.denver_football.attributes.opponent_score
                 }}",[255,255,255]]}, {"dl":[15,3,16,3,"#ffffff"]} ], "duration":
                 15 }
       - conditions:
@@ -401,31 +480,31 @@ action:
             data:
               qos: 0
               retain: false
-              topic: awtrix_a8ba90/custom/nflteamscore
+              topic: "{{basetopic}}/custom/{{appname}}"
               payload: >-
                 {  "draw":[ {"df":[0,0,16,8,"{{
-                states.sensor.denver_football.attributes.team_colors[0]
+                states.denver_football.attributes.team_colors[0]
                 }}"]},     {"df":[16,0,16,8,"{{
-                states.sensor.denver_football.attributes.opponent_colors[0]
+                states.denver_football.attributes.opponent_colors[0]
                 }}"]}, {"dl":[1,0,1,7,"{{
-                states.sensor.denver_football.attributes.team_colors[1] }}"]},
+                states.denver_football.attributes.team_colors[1] }}"]},
                 {"dl":[3,0,3,7,"{{
-                states.sensor.denver_football.attributes.team_colors[1] }}"]},
+                states.denver_football.attributes.team_colors[1] }}"]},
                 {"dl":[28,0,28,7,"{{
-                states.sensor.denver_football.attributes.opponent_colors[1]
+                states.denver_football.attributes.opponent_colors[1]
                 }}"]}, {"dl":[30,0,30,7,"{{
-                states.sensor.denver_football.attributes.opponent_colors[1]
+                states.denver_football.attributes.opponent_colors[1]
                 }}"]}, {"dp":[12,7,"#ffffff"]}, {"dp":[14,7,"#ffffff"]},
                 {"dp":[17,7,"#ffffff"]}, {"dp":[19,7,"#ffffff"]}, {"dt":[7, 1,
-                "{{ "0" + states.sensor.denver_football.attributes.team_score |
-                string if states.sensor.denver_football.attributes.team_score |
+                "{{ "0" + states.denver_football.attributes.team_score |
+                string if states.denver_football.attributes.team_score |
                 int < 10 else
-                states.sensor.denver_football.attributes.team_score
+                states.denver_football.attributes.team_score
                 }}",[255,255,255]]}, {"dt":[18, 1, "{{ "0" +
-                states.sensor.denver_football.attributes.opponent_score | string
-                if states.sensor.denver_football.attributes.opponent_score | int
+                states.denver_football.attributes.opponent_score | string
+                if states.denver_football.attributes.opponent_score | int
                 < 10 else
-                states.sensor.denver_football.attributes.opponent_score
+                states.denver_football.attributes.opponent_score
                 }}",[255,255,255]]}, {"dl":[15,3,16,3,"#ffffff"]} ], "duration":
                 15 }
 mode: restart
