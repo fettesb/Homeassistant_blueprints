@@ -39,13 +39,6 @@ blueprint:
               model: AWTRIX Light
           multiple: false
 
-    basetopic:
-      name: Basetopic
-      description: Basetopic is only nessery if you have a special mqtt topic configured on the Awtrix
-      default: "Device"
-      selector:
-        text:
-
     appname:
       name: Awtrix Application name
       description: This is the app name listed in the MQTT topic - it should be unique
@@ -66,7 +59,7 @@ blueprint:
 
 
 variables:
-  basetopic: >
+  awtrix: >
     {%- set ns = namespace(awtrix = []) -%}
     {%- for device_id in device_ids -%}
       {%- set device_name = iif(device_attr(device_id, 'name_by_user') != none, device_attr(device_id, 'name_by_user'), device_attr(device_id, 'name')) -%}
@@ -136,7 +129,7 @@ action:
             data:
               qos: 0
               retain: false
-              topic: "{{basetopic}}/custom/{{appname}}"
+              topic: "{{awtrix}}/custom/{{appname}}"
               payload: >-
                 {  "draw":[ {"df":[0,0,16,8,"{{
                 states.denver_football.attributes.team_colors[0]
@@ -178,7 +171,7 @@ action:
             data:
               qos: 0
               retain: false
-              topic: "{{basetopic}}/custom/{{appname}}"
+              topic: "{{awtrix}}/custom/{{appname}}"
       - conditions:
           - condition: trigger
             id:
@@ -193,7 +186,7 @@ action:
             data:
               qos: 0
               retain: false
-              topic: "{{basetopic}}/custom/{{appname}}"
+              topic: "{{awtrix}}/custom/{{appname}}"
               payload: >-
                 {  "draw":[ {"df":[0,0,16,8,"{{
                 states.denver_football.attributes.team_colors[0]
@@ -234,7 +227,7 @@ action:
             data:
               qos: 0
               retain: false
-              topic: "{{basetopic}}/custom/{{appname}}"
+              topic: "{{awtrix}}/custom/{{appname}}"
               payload: >-
                 {  "draw":[ {"df":[0,0,16,8,"{{
                 states.denver_football.attributes.team_colors[0]
@@ -275,7 +268,7 @@ action:
             data:
               qos: 0
               retain: false
-              topic: "{{basetopic}}/custom/{{appname}}"
+              topic: "{{awtrix}}/custom/{{appname}}"
               payload: >-
                 {  "draw":[ {"df":[0,0,16,8,"{{
                 states.denver_football.attributes.team_colors[0]
@@ -316,7 +309,7 @@ action:
             data:
               qos: 0
               retain: false
-              topic: "{{basetopic}}/custom/{{appname}}"
+              topic: "{{awtrix}}/custom/{{appname}}"
               payload: >-
                 {  "draw":[ {"df":[0,0,16,8,"{{
                 states.denver_football.attributes.team_colors[0]
@@ -357,7 +350,7 @@ action:
             data:
               qos: 0
               retain: false
-              topic: "{{basetopic}}/custom/{{appname}}"
+              topic: "{{awtrix}}/custom/{{appname}}"
               payload: >-
                 {  "draw":[ {"df":[0,0,16,8,"{{
                 states.denver_football.attributes.team_colors[0]
@@ -398,7 +391,7 @@ action:
             data:
               qos: 0
               retain: false
-              topic: "{{basetopic}}/custom/{{appname}}"
+              topic: "{{awtrix}}/custom/{{appname}}"
               payload: >-
                 {  "draw":[ {"df":[0,0,16,8,"{{
                 states.denver_football.attributes.team_colors[0]
@@ -439,7 +432,7 @@ action:
             data:
               qos: 0
               retain: false
-              topic: "{{basetopic}}/custom/{{appname}}"
+              topic: "{{awtrix}}/custom/{{appname}}"
               payload: >-
                 {  "draw":[ {"df":[0,0,16,8,"{{
                 states.denver_football.attributes.team_colors[0]
@@ -480,7 +473,7 @@ action:
             data:
               qos: 0
               retain: false
-              topic: "{{basetopic}}/custom/{{appname}}"
+              topic: "{{awtrix}}/custom/{{appname}}"
               payload: >-
                 {  "draw":[ {"df":[0,0,16,8,"{{
                 states.denver_football.attributes.team_colors[0]
