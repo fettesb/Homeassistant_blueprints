@@ -2,17 +2,11 @@ blueprint:
   name: "AWTRIX - NFL Team Scoreboard"
   author: Hank_the_Tank
   description: >
-    ## NFL Team Scoreboard for AWTRIX Light
+    # NFL Team Scoreboard for AWTRIX Light
 
-    Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et
-    dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet
-    clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur
-    sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.
-    At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est
-    Lorem ipsum dolor sit amet.
     
 
-    ### Screenshot
+    ### Screenshots
 
       ![](https://raw.githubusercontent.com/fettesb/Homeassistant_blueprints/main/screenshot.svg)
 
@@ -24,11 +18,10 @@ blueprint:
 
     ### Prerequisites
 
-    Before using this blueprint, ensure that you have HACS installed. You also need the ha-teamtracker integration [here](https://github.com/vasqued2/ha-teamtracker).
+    **Before** using this blueprint, ensure that you have **HACS** installed. You also need the ha-teamtracker integration [here](https://github.com/vasqued2/ha-teamtracker).
 
     ### Credits
 
-    INSERT COIN HERE
     
 
   domain: automation
@@ -40,11 +33,10 @@ blueprint:
       description: Select the Awtrix light
       selector:
         device:
-          filter:
-            - integration: mqtt
-              manufacturer: Blueforcer
-              model: AWTRIX Light
-          multiple: false
+          integration: mqtt
+          model: "AWTRIX Light"
+          manufacturer: Blueforcer
+          multiple: true
 
     appname:
       name: Awtrix Application name
@@ -66,61 +58,65 @@ blueprint:
 
 
 variables:
-  awtrix: >
-    {%- set ns = namespace(awtrix = []) -%}
-    {%- for device_id in device_ids -%}
-      {%- set device_name = iif(device_attr(device_id, 'name_by_user') != none, device_attr(device_id, 'name_by_user'), device_attr(device_id, 'name')) -%}
-      {%- set entity = expand(device_entities(device_id)) | select('search', 'device_topic') | map(attribute='entity_id') | first -%}
-      {%- set topic = states(entity) -%}
-      {% set ns.awtrix = ns.awtrix + [{"device": device_name, "entity": entity, "topic": topic}] -%}
-    {%- endfor -%}
-    {{ ns.awtrix }}
+  device_ids: !input awtrix
+  devices: >-
+    {% macro get_device(device_id) %}
+      {{ states((device_entities(device_id) | select('search','device_topic') | list)[0] | default('unknown')) }}
+    {% endmacro %}
+
+    {% set ns = namespace(devices=[]) %}
+    {% for device_id in device_ids %}
+      {% set device=get_device(device_id)|replace(' ','')|replace('\n','') %}
+      {% set ns.devices = ns.devices + [ device ] %}
+    {% endfor %}
+    {{ ns.devices | reject('match','unavailable|unknown') | list }}
   appname: !input appname
   my_sensor: !input my_sensor
-
+  awtrix: !input awtrix
+  my_sensor_name: "{{ my_sensor.split('.')[1] }}"
 
 trigger:
   - platform: state
     entity_id:
-      - "{{ my_sensor }}"
+      - !input my_sensor
     to: IN
     id: Game Start
   - platform: state
     entity_id:
-      - sensor.denver_football
+      - !input my_sensor
     id: Game End
     to: POST
   - platform: state
     entity_id:
-      - sensor.denver_football
+      - !input my_sensor
     attribute: team_score
     id: Team Score Change
   - platform: state
     entity_id:
-      - sensor.denver_football
+      - !input my_sensor
     attribute: opponent_score
     id: Opponent Score Change
   - platform: state
     entity_id:
-      - sensor.denver_football
+      - !input my_sensor
     attribute: quarter
     id: 1 Quarter
     to: "1"
   - platform: state
     entity_id:
-      - sensor.denver_football
+      - !input my_sensor
     attribute: quarter
     id: 2 Quarter
     to: "2"
   - platform: state
     entity_id:
-      - sensor.denver_football
+      - !input my_sensor
     attribute: quarter
     id: 3 Quarter
     to: "3"
   - platform: state
     entity_id:
-      - sensor.denver_football
+      - !input my_sensor
     attribute: quarter
     id: 4 Quarter
     to: "4"
@@ -167,7 +163,7 @@ action:
             data:
               qos: 0
               retain: false
-              topic: awtrix_a8ba90/switch
+              topic: "{{awtrix}}/switch"
               payload: "{\"name\":\"nflteamscore\"}"
       - conditions:
           - condition: trigger
@@ -184,7 +180,7 @@ action:
             id:
               - Team Score Change
           - condition: numeric_state
-            entity_id: sensor.denver_football
+            entity_id: !input my_sensor
             attribute: quarter
             above: 0
             below: 2
@@ -225,7 +221,7 @@ action:
             id:
               - Team Score Change
           - condition: numeric_state
-            entity_id: sensor.denver_football
+            entity_id: !input my_sensor
             attribute: quarter
             above: 1
             below: 3
@@ -266,7 +262,7 @@ action:
             id:
               - Team Score Change
           - condition: numeric_state
-            entity_id: sensor.denver_football
+            entity_id: !input my_sensor
             attribute: quarter
             above: 2
             below: 4
@@ -307,7 +303,7 @@ action:
             id:
               - Team Score Change
           - condition: numeric_state
-            entity_id: sensor.denver_football
+            entity_id: !input my_sensor
             attribute: quarter
             above: 3
             below: 5
@@ -348,7 +344,7 @@ action:
             id:
               - Opponent Score Change
           - condition: numeric_state
-            entity_id: sensor.denver_football
+            entity_id: !input my_sensor
             attribute: quarter
             above: 0
             below: 2
@@ -389,7 +385,7 @@ action:
             id:
               - Opponent Score Change
           - condition: numeric_state
-            entity_id: sensor.denver_football
+            entity_id: !input my_sensor
             attribute: quarter
             above: 1
             below: 3
@@ -430,7 +426,7 @@ action:
             id:
               - Opponent Score Change
           - condition: numeric_state
-            entity_id: sensor.denver_football
+            entity_id: !input my_sensor
             attribute: quarter
             above: 2
             below: 4
@@ -471,7 +467,7 @@ action:
             id:
               - Opponent Score Change
           - condition: numeric_state
-            entity_id: sensor.denver_football
+            entity_id: !input my_sensor
             attribute: quarter
             above: 3
             below: 5
