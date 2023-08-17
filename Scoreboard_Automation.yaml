@@ -155,6 +155,38 @@ variables:
       ], 
       "duration": 15 
     }
+  payload_third_quarter: >-
+    {
+      "draw":[ 
+        {"df":[0,0,16,8,"{{ team_colors_0 }}"]},     
+        {"df":[16,0,16,8,"{{ opponent_colors_0 }}"]}, 
+        {"dl":[1,0,1,7,"{{ team_colors_1 }}"]},
+        {"dl":[3,0,3,7,"{{ team_colors_1 }}"]},
+        {"dl":[28,0,28,7,"{{ opponent_colors_1 }}"]}, 
+        {"dl":[30,0,30,7,"{{ opponent_colors_1 }}"]}, 
+        {{ third_quarter }}
+        {"dt":[7, 1, "{{ team_score }}",[255,255,255]]}, 
+        {"dt":[18, 1, "{{ opponent_score }}",[255,255,255]]}, 
+        {"dl":[15,3,16,3,"#ffffff"]} 
+      ], 
+      "duration": 15 
+    }
+  payload_fourth_quarter: >-
+    {
+      "draw":[ 
+        {"df":[0,0,16,8,"{{ team_colors_0 }}"]},     
+        {"df":[16,0,16,8,"{{ opponent_colors_0 }}"]}, 
+        {"dl":[1,0,1,7,"{{ team_colors_1 }}"]},
+        {"dl":[3,0,3,7,"{{ team_colors_1 }}"]},
+        {"dl":[28,0,28,7,"{{ opponent_colors_1 }}"]}, 
+        {"dl":[30,0,30,7,"{{ opponent_colors_1 }}"]}, 
+        {{ fourth_quarter }}
+        {"dt":[7, 1, "{{ team_score }}",[255,255,255]]}, 
+        {"dt":[18, 1, "{{ opponent_score }}",[255,255,255]]}, 
+        {"dl":[15,3,16,3,"#ffffff"]} 
+      ], 
+      "duration": 15 
+    }
 trigger:
   - platform: state
     entity_id:
@@ -180,26 +212,8 @@ trigger:
     entity_id:
       - !input my_sensor
     attribute: quarter
-    id: First Quarter
-    to: "1"
-  - platform: state
-    entity_id:
-      - !input my_sensor
-    attribute: quarter
-    id: Second Quarter
-    to: "2"
-  - platform: state
-    entity_id:
-      - !input my_sensor
-    attribute: quarter
-    id: Third Quarter
-    to: "3"
-  - platform: state
-    entity_id:
-      - !input my_sensor
-    attribute: quarter
-    id: Fourth Quarter
-    to: "4"
+    id: Quarter Change
+
 condition: []
 action:
   - repeat:
@@ -226,23 +240,7 @@ action:
             - conditions:
                 - condition: trigger
                   id:
-                    - Team Score Change
-                - condition: numeric_state
-                  entity_id: !input my_sensor
-                  attribute: quarter
-                  above: 0
-                  below: 2
-              sequence:
-                - service: mqtt.publish
-                  data:
-                    qos: 0
-                    retain: false
-                    topic: "{{ repeat.item }}/custom/{{ appname }}"
-                    payload: "{{ payload_game_start }}"
-            - conditions:
-                - condition: trigger
-                  id:
-                    - Team Score Change
+                    - Quarter Change
                 - condition: numeric_state
                   entity_id: !input my_sensor
                   attribute: quarter
@@ -255,6 +253,38 @@ action:
                     retain: false
                     topic: "{{ repeat.item }}/custom/{{ appname }}"
                     payload: "{{ payload_second_quarter }}"
+            - conditions:
+                - condition: trigger
+                  id:
+                    - Quarter Change
+                - condition: numeric_state
+                  entity_id: !input my_sensor
+                  attribute: quarter
+                  above: 2
+                  below: 4
+              sequence:
+                - service: mqtt.publish
+                  data:
+                    qos: 0
+                    retain: false
+                    topic: "{{ repeat.item }}/custom/{{ appname }}"
+                    payload: "{{ payload_third_quarter }}"
+            - conditions:
+                - condition: trigger
+                  id:
+                    - Quarter Change
+                - condition: numeric_state
+                  entity_id: !input my_sensor
+                  attribute: quarter
+                  above: 3
+                  below: 5
+              sequence:
+                - service: mqtt.publish
+                  data:
+                    qos: 0
+                    retain: false
+                    topic: "{{ repeat.item }}/custom/{{ appname }}"
+                    payload: "{{ payload_fourth_quarter }}"
   - repeat:
       for_each: "{{ devices }}"
       sequence:
