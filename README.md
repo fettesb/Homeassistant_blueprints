@@ -2,7 +2,7 @@
 
 # NFL Team Scoreboard for AWTRIX Light
 
-    
+  ![](https://raw.githubusercontent.com/fettesb/Homeassistant_blueprints/main/awtrix_scoreboard.gif)  
 
 ### Screenshots
 
