@@ -4,33 +4,36 @@ blueprint:
   description: >
     # NFL Team Scoreboard for AWTRIX Light
 
-    
-
-    ### Screenshots
-
-      ![](https://raw.githubusercontent.com/fettesb/Homeassistant_blueprints/main/screenshot.svg)
-
-      ![](https://raw.githubusercontent.com/fettesb/Homeassistant_blueprints/main/screenshot2.svg)
-
-      ![](https://raw.githubusercontent.com/fettesb/Homeassistant_blueprints/main/screenshot3.svg)
-      
 
 
-    ### Prerequisites
+    ## Screenshots
+
+      ![](https://raw.githubusercontent.com/fettesb/Homeassistant_blueprints/main/screenshot.svg)  - ![](https://raw.githubusercontent.com/fettesb/Homeassistant_blueprints/main/screenshot2.svg)  -  ![](https://raw.githubusercontent.com/fettesb/Homeassistant_blueprints/main/screenshot3.svg)
+
+
+
+
+
+
+
+    ## Prerequisites
 
     **Before** using this blueprint, ensure that you have **HACS** installed. You also need the ha-teamtracker integration [here](https://github.com/vasqued2/ha-teamtracker).
 
-    ### Credits
-    
+
+    ## Credits
+
     to Blueforcer for Awtrix Light
 
     If you want to support his hard work in developing awtrix light, please consider to buy your Ulanzi clock with his affiliate links
-    
-    **(Currently 15€ off with code U15)** 
+
+    **(Currently 15€ off with code U15)**
+
 
     [EU] [link](https://www.ulanzi.de/products/ulanzi-pixel-smart-uhr-2882?ref=28e02dxl)
 
     [US] [link](https://www.ulanzi.com/products/ulanzi-pixel-smart-clock-2882?ref=28e02dxl)
+
 
     If you already have hundreds of clocks, there are more ways to support him.
 
@@ -38,7 +41,8 @@ blueprint:
 
     wanna join the [Darkside](https://discord.gg/a3n8spsn)?
 
-    Thanks in advance
+
+    **Thanks in advance**
 
   domain: automation
 
@@ -289,6 +293,146 @@ action:
                     retain: false
                     topic: "{{ repeat.item }}/custom/{{ appname }}"
                     payload: "{{ payload_fourth_quarter }}"
+            - conditions:
+                - condition: trigger
+                  id:
+                    - Team Score Change
+                - condition: numeric_state
+                  entity_id: !input my_sensor
+                  attribute: quarter
+                  above: 0
+                  below: 2
+              sequence:
+                - service: mqtt.publish
+                  data:
+                    qos: 0
+                    retain: false
+                    topic: "{{ repeat.item }}/custom/{{ appname }}"
+                    payload: "{{ payload_game_start }}"
+                - service: mqtt.publish
+                  data:
+                    qos: 0
+                    retain: false
+                    topic: "{{ repeat.item }}/switch"
+                    payload: "{{ payload_switch }}"
+            - conditions:
+                - condition: trigger
+                  id:
+                    - Team Score Change
+                - condition: numeric_state
+                  entity_id: !input my_sensor
+                  attribute: quarter
+                  above: 1
+                  below: 3
+              sequence:
+                - service: mqtt.publish
+                  data:
+                    qos: 0
+                    retain: false
+                    topic: "{{ repeat.item }}/custom/{{ appname }}"
+                    payload: "{{ payload_second_quarter }}"
+            - conditions:
+                - condition: trigger
+                  id:
+                    - Team Score Change
+                - condition: numeric_state
+                  entity_id: !input my_sensor
+                  attribute: quarter
+                  above: 2
+                  below: 4
+              sequence:
+                - service: mqtt.publish
+                  data:
+                    qos: 0
+                    retain: false
+                    topic: "{{ repeat.item }}/custom/{{ appname }}"
+                    payload: "{{ payload_third_quarter }}"
+            - conditions:
+                - condition: trigger
+                  id:
+                    - Team Score Change
+                - condition: numeric_state
+                  entity_id: !input my_sensor
+                  attribute: quarter
+                  above: 3
+                  below: 5
+              sequence:
+                - service: mqtt.publish
+                  data:
+                    qos: 0
+                    retain: false
+                    topic: "{{ repeat.item }}/custom/{{ appname }}"
+                    payload: "{{ payload_fourth_quarter }}"
+            - conditions:
+                - condition: trigger
+                  id:
+                    - Opponent Score Change
+                - condition: numeric_state
+                  entity_id: !input my_sensor
+                  attribute: quarter
+                  above: 0
+                  below: 2
+              sequence:
+                - service: mqtt.publish
+                  data:
+                    qos: 0
+                    retain: false
+                    topic: "{{ repeat.item }}/custom/{{ appname }}"
+                    payload: "{{ payload_game_start }}"
+                - service: mqtt.publish
+                  data:
+                    qos: 0
+                    retain: false
+                    topic: "{{ repeat.item }}/switch"
+                    payload: "{{ payload_switch }}"
+            - conditions:
+                - condition: trigger
+                  id:
+                    - Opponent Score Change
+                - condition: numeric_state
+                  entity_id: !input my_sensor
+                  attribute: quarter
+                  above: 1
+                  below: 3
+              sequence:
+                - service: mqtt.publish
+                  data:
+                    qos: 0
+                    retain: false
+                    topic: "{{ repeat.item }}/custom/{{ appname }}"
+                    payload: "{{ payload_second_quarter }}"
+            - conditions:
+                - condition: trigger
+                  id:
+                    - Opponent Score Change
+                - condition: numeric_state
+                  entity_id: !input my_sensor
+                  attribute: quarter
+                  above: 2
+                  below: 4
+              sequence:
+                - service: mqtt.publish
+                  data:
+                    qos: 0
+                    retain: false
+                    topic: "{{ repeat.item }}/custom/{{ appname }}"
+                    payload: "{{ payload_third_quarter }}"
+            - conditions:
+                - condition: trigger
+                  id:
+                    - Team Score Change
+                - condition: numeric_state
+                  entity_id: !input my_sensor
+                  attribute: quarter
+                  above: 3
+                  below: 5
+              sequence:
+                - service: mqtt.publish
+                  data:
+                    qos: 0
+                    retain: false
+                    topic: "{{ repeat.item }}/custom/{{ appname }}"
+                    payload: "{{ payload_fourth_quarter }}"                   
   - repeat:
       for_each: "{{ devices }}"
       sequence:
