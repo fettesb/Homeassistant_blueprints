@@ -73,7 +73,7 @@ blueprint:
           filter:
             - integration: teamtracker
 
-  source_url: https://raw.githubusercontent.com/fettesb/Homeassistant_blueprints/main/Scoreboard_Automation.yaml
+  source_url: https://raw.githubusercontent.com/fettesb/Homeassistant_blueprints/main/Awtrix%20NFL%20Team%20Scoreboard/awtrix_nfl_team_scoreboard.yaml
 
 variables:
   device_ids: !input awtrix
