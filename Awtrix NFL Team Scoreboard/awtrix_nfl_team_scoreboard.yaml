@@ -51,7 +51,8 @@ blueprint:
   input:
     awtrix:
       name: AWTRIX Light
-      description: Select the Awtrix light
+      description: >-
+        Select the Awtrix light
       selector:
         device:
           filter:
@@ -62,10 +63,22 @@ blueprint:
 
     appname:
       name: Awtrix Application name
-      description: This is the app name listed in the MQTT topic - it should be unique
+      description: >-
+        This is the app name listed in the MQTT topic - it should be unique
       default: "nflteamscore"
       selector:
         text:
+
+    message_duration:
+      name: Message Duration ⏱️
+      description: >-
+        How long should the message remain on the screen (in seconds).
+      selector:
+        number:
+          min: 0
+          max: 300
+          unit_of_measurement: "sec"
+      default: 15
 
     my_sensor:
       name: Football Sensor
@@ -91,6 +104,7 @@ variables:
     {{ ns.devices | reject('match','unavailable|unknown') | list }}
   appname: !input appname
   my_sensor: !input my_sensor
+  message_duration: !input message_duration
   team_colors_0: "{{ state_attr(my_sensor, 'team_colors')[0] }}"
   team_colors_1: "{{ state_attr(my_sensor, 'team_colors')[1] }}"
   opponent_colors_0: "{{ state_attr(my_sensor, 'opponent_colors')[0] }}"
@@ -147,7 +161,7 @@ variables:
         {"dt":[18, 1, "{{ opponent_score }}",[255,255,255]]}, 
         {"dl":[15,3,16,3,"#ffffff"]} 
       ], 
-      "duration": 15 
+      "duration": {{ message_duration }} 
     }
   payload_second_quarter: >-
     {
@@ -163,7 +177,7 @@ variables:
         {"dt":[18, 1, "{{ opponent_score }}",[255,255,255]]}, 
         {"dl":[15,3,16,3,"#ffffff"]} 
       ], 
-      "duration": 15 
+      "duration": {{ message_duration }} 
     }
   payload_third_quarter: >-
     {
@@ -179,7 +193,7 @@ variables:
         {"dt":[18, 1, "{{ opponent_score }}",[255,255,255]]}, 
         {"dl":[15,3,16,3,"#ffffff"]} 
       ], 
-      "duration": 15 
+      "duration": {{ message_duration }} 
     }
   payload_fourth_quarter: >-
     {
@@ -195,7 +209,7 @@ variables:
         {"dt":[18, 1, "{{ opponent_score }}",[255,255,255]]}, 
         {"dl":[15,3,16,3,"#ffffff"]} 
       ], 
-      "duration": 15 
+      "duration": {{ message_duration }} 
     }
 trigger:
   - platform: state
@@ -207,6 +221,10 @@ trigger:
     entity_id:
       - !input my_sensor
     to: POST
+    for:
+      hours: 0
+      minutes: 5
+      seconds: 0
     id: Game End
   - platform: state
     entity_id:
