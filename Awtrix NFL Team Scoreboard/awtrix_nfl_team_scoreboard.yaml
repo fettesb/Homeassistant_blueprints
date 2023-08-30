@@ -232,10 +232,6 @@ trigger:
     entity_id:
       - !input my_sensor
     to: POST
-    for:
-      hours: 0
-      minutes: 5
-      seconds: 0
     id: Game End
   - platform: state
     entity_id:
