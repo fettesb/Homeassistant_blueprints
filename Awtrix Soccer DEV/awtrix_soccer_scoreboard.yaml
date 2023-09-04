@@ -116,20 +116,8 @@ variables:
   team_colors_1: "{{ state_attr(my_sensor, 'team_colors')[1] }}"
   opponent_colors_0: "{{ state_attr(my_sensor, 'opponent_colors')[0] }}"
   opponent_colors_1: "{{ state_attr(my_sensor, 'opponent_colors')[1] }}"
-  team_score: >-
-    {% set raw_team_score = state_attr(my_sensor, 'team_score') %}
-    {% if raw_team_score|int < 10 %}
-      {{  "0" + raw_team_score|string }}
-    {% else %}
-        {{ raw_team_score|string }}
-    {% endif %}
-  opponent_score: >-
-    {% set raw_opponent_score = state_attr(my_sensor, 'opponent_score') %}
-    {% if raw_opponent_score|int < 10 %}
-        {{ "0" + raw_opponent_score|string }}
-    {% else %}
-        {{ raw_opponent_score|string }}
-    {% endif %}
+  team_score: "{{ state_attr(my_sensor, 'team_score') }}"
+  opponent_score: "{{ state_attr(my_sensor, 'opponent_score') }}"
   first_half: >-
     {"dp":[12,7,"#ffffff"]},
     {"dp":[18,7,"#707070"]},
