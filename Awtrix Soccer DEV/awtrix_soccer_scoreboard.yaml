@@ -138,14 +138,31 @@ variables:
         {"df":[6,1,2,2,"{{ team_colors_0 }}"]},
         {"dl":[2,1,2,7,"{{ team_colors_1 }}"]},
         {"dl":[5,1,5,7,"{{ team_colors_1 }}"]},
-        {{ first_half }}
         {"df":[24,1,2,2,"{{ opponent_colors_0 }}"]},
         {"df":[27,0,2,8,"{{ opponent_colors_0 }}"]},
         {"df":[30,1,2,2,"{{ opponent_colors_0 }}"]},
         {"dl":[26,1,26,7,"{{ opponent_colors_1 }}"]},
         {"dl":[29,1,29,7,"{{ opponent_colors_1 }}"]}    
       ], 
-      "duration": {{ message_duration }} 
+      "duration": {{ message_duration }}
+    }
+  payload_second_half: >-
+    {
+      "text": "{{ team_score }}:{{ opponent_score }}",
+      "draw":[ 
+        {"df":[0,1,2,2,"{{ team_colors_0 }}"]},
+        {"df":[3,0,2,8,"{{ team_colors_0 }}"]},
+        {"df":[6,1,2,2,"{{ team_colors_0 }}"]},
+        {"dl":[2,1,2,7,"{{ team_colors_1 }}"]},
+        {"dl":[5,1,5,7,"{{ team_colors_1 }}"]},
+        {"df":[24,1,2,2,"{{ opponent_colors_0 }}"]},
+        {"df":[27,0,2,8,"{{ opponent_colors_0 }}"]},
+        {"df":[30,1,2,2,"{{ opponent_colors_0 }}"]},
+        {"dl":[26,1,26,7,"{{ opponent_colors_1 }}"]},
+        {"dl":[29,1,29,7,"{{ opponent_colors_1 }}"]}    
+      ], 
+      "duration": {{ message_duration }},
+      "lifetime": 2700
     }
 
 trigger:
@@ -157,6 +174,7 @@ trigger:
   - platform: state
     entity_id:
       - !input my_sensor
+    from: IN  
     to: POST
     id: Game End
   - platform: state
@@ -175,7 +193,6 @@ action:
                 - condition: trigger
                   id:
                     - Game Start
-                    - Change
               sequence:
                 - service: mqtt.publish
                   data:
@@ -188,7 +205,18 @@ action:
                     qos: 0
                     retain: false
                     topic: "{{ repeat.item }}/switch"
-                    payload: "{{ payload_switch }}"                   
+                    payload: "{{ payload_switch }}"
+            - conditions:
+                - condition: trigger
+                  id:
+                    - Change
+              sequence:
+                - service: mqtt.publish
+                  data:
+                    qos: 0
+                    retain: false
+                    topic: "{{ repeat.item }}/custom/{{ appname }}"
+                    payload: "{{ payload_game_start }}"                   
   - repeat:
       for_each: "{{ devices }}"
       sequence:
@@ -203,4 +231,4 @@ action:
                     qos: 0
                     retain: false
                     topic: "{{ repeat.item }}/custom/{{ appname }}"
-mode: single
+mode: restart
