@@ -447,7 +447,7 @@ action:
             - conditions:
                 - condition: trigger
                   id:
-                    - Team Score Change
+                    - Opponent Score Change
                 - condition: numeric_state
                   entity_id: !input my_sensor
                   attribute: quarter
