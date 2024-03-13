@@ -57,15 +57,13 @@ blueprint:
 
   input:
     awtrix:
-      name: AWTRIX Light
-      description: >-
-        Select the Awtrix light
+      name: AWTRIX Device
+      description: Select the Awtrix 3
       selector:
         device:
-          filter:
-            - integration: mqtt
-              manufacturer: Blueforcer
-              model: AWTRIX Light
+          integration: mqtt
+          manufacturer: Blueforcer
+          model: AWTRIX 3
           multiple: true
 
     appname:
